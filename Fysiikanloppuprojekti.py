@@ -8,6 +8,11 @@ from geopy.distance import geodesic
 import folium
 from streamlit_folium import folium_static
 
+url = "https://raw.githubusercontent.com/Sakuk-k/Fysiikan-loppuprojekti/refs/heads/main/Accelerometer.csv"
+url = "https://raw.githubusercontent.com/Sakuk-k/Fysiikan-loppuprojekti/refs/heads/main/Location.csv"
+
+df = pd.read_csv(url)
+
 
 @st.cache_data
 def load_data():
