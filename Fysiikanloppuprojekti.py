@@ -17,11 +17,11 @@ def load_data():
 
 acc_data, gps_data = load_data()
 
-# Poistetaan ylimääräiset välilyönnit sarakkeiden nimistä
+
 acc_data.columns = acc_data.columns.str.strip()
 gps_data.columns = gps_data.columns.str.strip()
 
-# Tarkistetaan, että tarvittavat sarakkeet löytyvät
+
 required_acc_columns = ['Time (s)', 'Z (m/s^2)']
 required_gps_columns = ['Time (s)', 'Latitude (°)', 'Longitude (°)']
 
@@ -36,7 +36,7 @@ if missing_gps:
     st.error(f"Missing columns in GPS data: {missing_gps}")
     st.stop()
 
-# Haetaan tarvittavat tiedot
+
 time_acc = acc_data['Time (s)']
 acc_z = acc_data['Z (m/s^2)']
 
@@ -44,25 +44,25 @@ time_gps = gps_data['Time (s)']
 lat = gps_data['Latitude (°)']
 lon = gps_data['Longitude (°)']
 
-# Poistetaan puuttuvat GPS-tiedot
+
 gps_data.dropna(subset=['Latitude (°)', 'Longitude (°)'], inplace=True)
 
-# Suodatetaan kiihtyvyysdata matalapäästösuotimella
+
 if len(acc_z) > 1:
     b, a = signal.butter(4, 0.1, 'low')
     acc_z_filtered = signal.filtfilt(b, a, acc_z)
 else:
     acc_z_filtered = acc_z
 
-# Askelten laskeminen nollakohdista
+
 steps_zero_crossings = np.where((acc_z_filtered[:-1] < 0) & (acc_z_filtered[1:] > 0))[0]
 step_count_zero_crossings = len(steps_zero_crossings)
 
-# Askelten laskeminen huipuista
-peaks, _ = signal.find_peaks(acc_z_filtered, height=0.5)
+
+peaks, _ = signal.find_peaks(acc_z_filtered, height=0.5)  
 step_count_peaks = len(peaks)
 
-# Fourier-analyysi askeleiden laskemiseen
+
 if len(time_acc) > 1:
     fs = 1 / np.mean(np.diff(time_acc))
     freqs = scipy.fftpack.fftfreq(len(acc_z_filtered), d=1/fs)
@@ -70,11 +70,12 @@ if len(time_acc) > 1:
 
     dominant_freq = freqs[np.argmax(power_spectrum[:len(freqs)//2])]
     step_count_fourier = int(dominant_freq * (time_acc.iloc[-1] - time_acc.iloc[0]))
+
 else:
     freqs, power_spectrum = np.array([]), np.array([])
     step_count_fourier = 0
 
-# Lasketaan matka ja nopeus GPS-datasta
+
 if len(lat) > 1:
     distance = sum(geodesic((lat[i], lon[i]), (lat[i+1], lon[i+1])).meters for i in range(len(lat)-1))
     total_time = time_gps.iloc[-1] - time_gps.iloc[0]
@@ -82,10 +83,10 @@ if len(lat) > 1:
 else:
     distance, avg_speed = 0, 0
 
-# Askelpituuden laskeminen
+
 step_length = distance / step_count_zero_crossings if step_count_zero_crossings > 0 else 0
 
-# Näytetään tulokset Streamlitissä
+
 st.title("GPS ja kiihtyvyysdatan analyysi")
 st.write(f"Askeleet (nollakohdat): {step_count_zero_crossings}")
 st.write(f"Askeleet (huiput): {step_count_peaks}")
@@ -94,7 +95,7 @@ st.write(f"Matka: {distance:.2f} m")
 st.write(f"Keskinopeus: {avg_speed:.2f} m/s")
 st.write(f"Askelpituus: {step_length:.2f} m")
 
-# Piirretään suodatettu kiihtyvyysdata
+
 fig1, ax1 = plt.subplots()
 ax1.plot(time_acc, acc_z_filtered, label="Suodatettu kiihtyvyysdata (Z)")
 ax1.set_xlabel("Time (s)")
@@ -102,7 +103,7 @@ ax1.set_ylabel("Acceleration (m/s²)")
 ax1.legend()
 st.pyplot(fig1)
 
-# Piirretään tehospektri, jos dataa on
+
 if len(freqs) > 0:
     fig2, ax2 = plt.subplots()
     ax2.plot(freqs[:len(freqs)//2], power_spectrum[:len(freqs)//2])
@@ -111,7 +112,7 @@ if len(freqs) > 0:
     ax2.set_title("Tehospektri")
     st.pyplot(fig2)
 
-# Piirretään GPS-data kartalle, jos saatavilla
+
 if len(lat) > 0:
     m = folium.Map(location=[lat.mean(), lon.mean()], zoom_start=15)
     for i in range(len(lat)):
@@ -120,9 +121,7 @@ if len(lat) > 0:
 else:
     st.warning("No GPS data available to generate a map.")
 
-# Lopuksi lisätään humoristinen loppukaneetti
 st.title("phyphox")
 st.caption("Mittaustilanteessa havaittiin yllättävä dynaaminen poikkeama, joka näkyy kiihtyvyysdatan voimakkaana piikkinä. Analyysin perusteella kyseessä on todennäköisesti spontaani liukastuminen, mikä lisää tutkimuksen realistisuutta ja antaa syvemmän käsityksen todellisista liikkumishaasteista. Tieteellisen tarkastelun nimissä ehdotan, että tapaturman dramatiikka huomioidaan lisäpisteiden muodossa – jos ei tieteellisen rohkeuden, niin ainakin fyysisen uhrautumisen ansiosta. Koska eikös se ole niin, että tieteen eteen on joskus kaaduttava – kirjaimellisesti?  😅")
 
-# Näytetään kuva
 st.image("data.png", caption="Analyysisovellus", use_container_width=True)
