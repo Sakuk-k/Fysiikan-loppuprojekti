@@ -17,7 +17,7 @@ def load_data():
 
 acc_data, gps_data = load_data()
 
-# Poistetaan mahdolliset ylimääräiset välilyönnit sarakkeiden nimistä
+# Poistetaan ylimääräiset välilyönnit sarakkeiden nimistä
 acc_data.columns = acc_data.columns.str.strip()
 gps_data.columns = gps_data.columns.str.strip()
 
@@ -126,4 +126,3 @@ st.caption("Mittaustilanteessa havaittiin yllättävä dynaaminen poikkeama, jok
 
 # Näytetään kuva
 st.image("data.png", caption="Analyysisovellus", use_container_width=True)
-
