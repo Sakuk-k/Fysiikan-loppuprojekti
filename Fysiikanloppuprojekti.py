@@ -124,4 +124,4 @@ else:
 st.title("phyphox")
 st.caption("Mittaustilanteessa havaittiin yllättävä dynaaminen poikkeama, joka näkyy kiihtyvyysdatan voimakkaana piikkinä. Analyysin perusteella kyseessä on todennäköisesti spontaani liukastuminen, mikä lisää tutkimuksen realistisuutta ja antaa syvemmän käsityksen todellisista liikkumishaasteista. Tieteellisen tarkastelun nimissä ehdotan, että tapaturman dramatiikka huomioidaan lisäpisteiden muodossa – jos ei tieteellisen rohkeuden, niin ainakin fyysisen uhrautumisen ansiosta. Koska eikös se ole niin, että tieteen eteen on joskus kaaduttava – kirjaimellisesti?  😅")
 
-st.image("data.png", caption="Analyysisovellus", use_container_width=True)
+st.image("data.png", caption="phyphox", use_container_width=True)
